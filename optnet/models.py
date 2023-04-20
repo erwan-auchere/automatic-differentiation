@@ -35,7 +35,8 @@ def train(
     val_loader: torch.utils.data.DataLoader,
     optimizer: torch.optim.Optimizer,
     loss_fn: torch.nn.Module,
-    n_epochs: int = 10
+    n_epochs: int = 10,
+    verbose: bool = False
 ):
     train_losses, val_losses = [], []
     best_model = model.state_dict()
@@ -57,8 +58,14 @@ def train(
             loss.backward()
             optimizer.step()
 
+            # In the case of the OptNet, s0 has to stay non-negative
+            #for name, parameter in model.named_parameters():
+            #    if name == 's0':
+            #        parameter = torch.clamp(parameter, min=0)
+
             
-        if (epoch+1)%20 == 0: print(f'Epoch {epoch+1}/{n_epochs}, training loss: {train_loss/len(train_loader):.4g}')
+        if verbose and (epoch+1)%20 == 0:
+            print(f'Epoch {epoch+1}/{n_epochs}, training loss: {train_loss/len(train_loader):.4g}')
         train_losses.append(train_loss/len(train_loader))
 
                 
@@ -72,18 +79,23 @@ def train(
                 out = model(noised)
                 loss += loss_fn(out, target).item()
                 
-        if (epoch+1)%10 == 0: print(f'Epoch {epoch+1}/{n_epochs}, val loss: {loss/len(val_loader):.4g}')
+        if verbose and (epoch+1)%10 == 0:
+            print(f'Epoch {epoch+1}/{n_epochs}, val loss: {loss/len(val_loader):.4g}')
         val_losses.append(loss/len(val_loader))
 
         # Update of the best model if the validation loss is at its lowest:
         if val_losses[-1] < min_loss:
             min_loss = val_losses[-1]
             best_model = model.state_dict()
-        else:
+        
+        # Keep track of the number of epochs val_loss has not been decreasing for
+        if len(val_losses)>=2 and val_losses[-1] >= val_losses[-2]:
             epochs_wo_improvement += 1
+        else:
+            epochs_wo_improvement = 0
         
         if epochs_wo_improvement == 10:
-            print("10 epochs without improvement, stopping training")
+            if verbose: print("10 epochs without improvement, stopping training")
             break
     
     # Returns best model wrt validation loss
@@ -98,7 +110,7 @@ def plot_progression(train_losses, val_losses):
     ax.set_xlabel('Epochs')
     ax.set_ylabel('Mean Squared Error (MSE)')
     ax.legend()
-    fig.show()
+    return fig, ax
 
 
 ### FUNCTIONS TO BUILD THE MATRICES Γ AND D
@@ -137,27 +149,28 @@ class OptNetDenoiser(torch.nn.Module):
             - 'tv' for the initialization with the matrix of the l-inf TV problem
         """
         super().__init__()
-        self.solver = qpth.qp.QPFunction(verbose=False)
+        n_ineq = 2*(series_length - 1)
+        self.solver = qpth.qp.QPFunction(verbose=-1)
 
         # Fixed problem parameters
         self.Q = torch.autograd.Variable(torch.eye(series_length))
         self.A = torch.autograd.Variable(torch.Tensor())
         self.b = torch.autograd.Variable(torch.Tensor())
+        self.Gamma = torch.autograd.Variable(
+            build_linf_constraint_matrix(series_length-1)
+        )
 
         # Learnable parameters
         if init_mode == 'random':
-            self.G = torch.nn.Parameter(torch.normal(0, 1, (series_length-1, series_length)))
+            self.D = torch.nn.Parameter(torch.normal(0, 1, (n_ineq, series_length)))
         elif init_mode == 'tv':
-            Gamma = build_linf_constraint_matrix(series_length-1)
-            D = build_fd_matrix(series_length)
-            self.G = torch.nn.Parameter(Gamma.mm(D))
-        self.theta = torch.nn.Parameter(torch.ones(1))
+            self.D = torch.nn.Parameter(build_fd_matrix(series_length))
+        self.theta = torch.nn.Parameter(torch.ones((1,)))
     
     def forward(self, y:torch.Tensor):
-        *batch_size, series_length = y.shape
-        nb_constraints = self.G.shape[0]
-        h = self.theta * torch.ones(*batch_size, nb_constraints)
-        return self.solver(self.Q, -y, self.G, h, self.A, self.b)
+        G = torch.mm(self.Gamma, self.D)
+        h = self.theta * torch.ones((G.shape[0],))
+        return self.solver(self.Q, -y, G, h, self.A, self.b)
 
 
 class DenseNetDenoiser(torch.nn.Module):
@@ -170,12 +183,14 @@ class DenseNetDenoiser(torch.nn.Module):
             - 'ma' for a moving average : z*_t = (y_{t-1}+y_t+y_{t+1})/3
         """
         super().__init__()
-        self.linear = torch.nn.Linear(series_length, series_length, bias=init_mode=='random')
+        self.linear = torch.nn.Linear(series_length, series_length)
         if init_mode == 'ma':
             weight = torch.eye(series_length) / 3
             weight[1:,:-1] += torch.eye(series_length-1) / 3
             weight[:-1,1:] += torch.eye(series_length-1) / 3
+            bias = torch.zeros(series_length)
             self.linear.weight = torch.nn.Parameter(weight)
+            self.linear.bias = torch.nn.Parameter(bias)
         
 
     def forward(self, x:torch.Tensor):
