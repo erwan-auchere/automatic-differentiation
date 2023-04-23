@@ -51,7 +51,7 @@ NUM_SAMPLES = args.num_samples
 resume = args.resume
 method = args.method
 NUM_EPOCHS = args.num_epochs
-EMBEDDING_SIZE = 500 if dataset == 'mnist' else 512
+EMBEDDING_SIZE = 500 if dataset == 'mnist' else  100 if dataset == 'cifar100' else 512
 
 
 def experiment_id(dataset, k, tau, nloglr, method):
@@ -91,6 +91,9 @@ gpu = torch.device('cuda')
 
 if dataset == 'mnist':
     h_phi = ConvNet().to(gpu)
+elif dataset == 'cifar100':
+    h_phi=preactresnet18().to(gpu)
+    
 else:
     h_phi = PreActResNet18(num_channels=3 if dataset ==
                            'cifar10' else 1).to(gpu)

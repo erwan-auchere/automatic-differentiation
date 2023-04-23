@@ -11,6 +11,7 @@ from pl import PL
 from utils import one_hot, generate_nothing
 from models.preact_resnet import PreActResNet18
 from models.easy_net import ConvNet
+from models.preact_cifar100 import preactresnet18
 from dataset import DataSplit
 from neuralsort import NeuralSort
 from dknn_layer import DKNN
@@ -44,8 +45,9 @@ NUM_SAMPLES = 5
 resume = args.resume
 method = args.method
 
-NUM_EPOCHS = 150 if dataset == 'cifar10' else 50
-EMBEDDING_SIZE = 500 if dataset == 'mnist' else 512
+NUM_EPOCHS = 5
+
+EMBEDDING_SIZE = 500 if dataset == 'mnist' else  100 if dataset == 'cifar100' else 512
 
 
 def experiment_id(dataset, k, tau, nloglr, method):
@@ -59,6 +61,9 @@ gpu = torch.device('cuda')
 
 if dataset == 'mnist':
     h_phi = ConvNet().to(gpu)
+elif dataset == 'cifar100':
+    h_phi=preactresnet18().to(gpu)
+    
 else:
     h_phi = PreActResNet18(num_channels=3 if dataset ==
                            'cifar10' else 1).to(gpu)
