@@ -13,8 +13,8 @@ from models.preact_resnet import PreActResNet18
 from models.easy_net import ConvNet
 from models.preact_cifar100 import preactresnet18
 from dataset import DataSplit
-from neuralsort import NeuralSort
-from dknn_layer import DKNN
+#from neuralsort import NeuralSort
+#from dknn_layer import DKNN
 
 torch.manual_seed(94305)
 torch.cuda.manual_seed(94305)
@@ -45,21 +45,28 @@ NUM_SAMPLES = 5
 resume = args.resume
 method = args.method
 
-NUM_EPOCHS = 5
+NUM_EPOCHS = 50
 
 EMBEDDING_SIZE = 500 if dataset == 'mnist' else  100 if dataset == 'cifar100' else 512
 
 
-def experiment_id(dataset, k, tau, nloglr, method):
-    return 'baseline-resnet-%s-%s-k%d-t%d-b%d' % (dataset, method, k, tau, nloglr)
+#def experiment_id(dataset, k, tau, nloglr, method):
+ #   return 'baseline-resnet-%s-%s-k%d-t%d-b%d' % (dataset, method, k, tau, nloglr)
+  #  return 'baseline-resnet-%s-%s-k%d-t%d-b%d' % (dataset, nloglr)
+
+def experiment_id(dataset, nloglr):
+    return 'baseline-resnet-%s-b%d' % (dataset, nloglr)
+    
 
 
-e_id = experiment_id(dataset, k, tau * 10, args.nloglr, method)
+e_id = experiment_id(dataset, args.nloglr)
 
 
 gpu = torch.device('cuda')
 
 if dataset == 'mnist':
+    h_phi = ConvNet().to(gpu)
+elif dataset == 'SVHN':
     h_phi = ConvNet().to(gpu)
 elif dataset == 'cifar100':
     h_phi=preactresnet18().to(gpu)
@@ -70,8 +77,11 @@ else:
 
 optimizer = torch.optim.SGD(
     h_phi.parameters(), lr=LEARNING_RATE, momentum=0.9, weight_decay=5e-4)
+if dataset == 'cifar100':
+    linear_layer = torch.nn.Linear(EMBEDDING_SIZE, 100).to(device=gpu)
+else:
+    linear_layer = torch.nn.Linear(EMBEDDING_SIZE, 10).to(device=gpu)
 
-linear_layer = torch.nn.Linear(EMBEDDING_SIZE, 10).to(device=gpu)
 ce_loss = torch.nn.CrossEntropyLoss()
 
 batched_train = split.get_train_loader(NUM_TRAIN_QUERIES)

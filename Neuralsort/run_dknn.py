@@ -11,6 +11,7 @@ from pl import PL
 from utils import one_hot, generate_nothing
 from models.preact_resnet import PreActResNet18
 from models.easy_net import ConvNet
+from models.preact_cifar100 import preactresnet18
 from dataset import DataSplit
 from neuralsort import NeuralSort
 from dknn_layer import DKNN
@@ -113,8 +114,11 @@ else:
 
 optimizer = torch.optim.SGD(
     h_phi.parameters(), lr=LEARNING_RATE, momentum=0.9, weight_decay=5e-4)
+if dataset == 'cifar100':
+    unit_test_linear_layer = torch.nn.Linear(EMBEDDING_SIZE, 100).to(device=gpu)
+else:
+    unit_test_linear_layer = torch.nn.Linear(EMBEDDING_SIZE, 10).to(device=gpu)
 
-unit_test_linear_layer = torch.nn.Linear(EMBEDDING_SIZE, 10).to(device=gpu)
 unit_test_ce_loss = torch.nn.CrossEntropyLoss()
 
 ema_factor = .999
@@ -141,9 +145,12 @@ def train(epoch):
 
         neighbor_e = h_phi(cand_x).reshape(NUM_TRAIN_NEIGHBORS, EMBEDDING_SIZE)
         query_e = h_phi(query_x).reshape(NUM_TRAIN_QUERIES, EMBEDDING_SIZE)
-
-        neighbor_y_oh = one_hot(cand_y).reshape(NUM_TRAIN_NEIGHBORS, 10)
-        query_y_oh = one_hot(query_y).reshape(NUM_TRAIN_QUERIES, 10)
+        if dataset == 'cifar100':
+            neighbor_y_oh = one_hot(cand_y,100).reshape(NUM_TRAIN_NEIGHBORS, 100)
+            query_y_oh = one_hot(query_y,100).reshape(NUM_TRAIN_QUERIES, 100)
+        else:
+            neighbor_y_oh = one_hot(cand_y,10).reshape(NUM_TRAIN_NEIGHBORS, 10)
+            query_y_oh = one_hot(query_y,10).reshape(NUM_TRAIN_QUERIES, 10)    
 
         losses = dknn_loss(query_e, neighbor_e, query_y_oh, neighbor_y_oh)
         loss = losses.mean()
