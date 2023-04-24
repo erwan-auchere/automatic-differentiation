@@ -45,7 +45,7 @@ NUM_SAMPLES = 5
 resume = args.resume
 method = args.method
 
-NUM_EPOCHS = 50
+NUM_EPOCHS = 30
 
 EMBEDDING_SIZE = 500 if dataset == 'mnist' else  100 if dataset == 'cifar100' else 512
 

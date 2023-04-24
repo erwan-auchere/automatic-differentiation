@@ -38,7 +38,7 @@ class PL(Distribution):
         self.hard = hard
         self.n = self.scores.size()[1]
 
-        if isinstance(scores, Number):
+        if isinstance(scores,Number):
             batch_shape = torch.Size()
         else:
             batch_shape = self.scores.size()
