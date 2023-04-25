@@ -1,9 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,visualstudio,visualstudiocode,jupyternotebooks
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,visualstudio,visualstudiocode,jupyternotebooks
 
-### Vector cache (GloVe/FastText)
-
-.vector_cache/*
+### Latex files
+optnet/latex/*
 
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
