@@ -5,6 +5,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 import tensorflow as tf
 import numpy as np
+import pandas as pd
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.datasets import cifar100
@@ -48,7 +49,38 @@ elif dataset == 'cifar100':
     ## Grey Scale is 0 to 255. Divide by 255 to normalize values 0 to 1.
     X_train = X_train.astype('float32') / 255
     X_test = X_test.astype('float32') / 255
+    
+elif dataset == 'emnist_minst':
+    
+    data_train = pd.read_csv("./data/emnist/emnist-mnist-train.csv", header=None)
+    data_test = pd.read_csv("./data/emnist/emnist-mnist-test.csv", header=None)
 
+    
+    #flatten = train_images.shape[1] * train_images.shape[2]
+    X_train = np.array(data_train.loc[:,1:])
+    train_labels=np.array(data_train[0])
+    X_test =  np.array(data_test.loc[:,1:])
+    test_labels= np.array(data_test[0])
+
+    ## Grey Scale is 0 to 255. Divide by 255 to normalize values 0 to 1.
+    X_train = X_train.astype('float32') / 255
+    X_test = X_test.astype('float32') / 255
+    
+elif dataset == 'emnist_digit':
+
+    data_train = pd.read_csv("./data/emnist/emnist-digits-train.csv", header=None)
+    data_test = pd.read_csv("./data/emnist/emnist-digits-test.csv", header=None)
+    
+    
+    #flatten = train_images.shape[1] * train_images.shape[2]
+    X_train = np.array(data_train.loc[:,1:])
+    train_labels=np.array(data_train[0])
+    X_test =  np.array(data_test.loc[:,1:])
+    test_labels= np.array(data_test[0])
+
+    ## Grey Scale is 0 to 255. Divide by 255 to normalize values 0 to 1.
+    X_train = X_train.astype('float32') / 255
+    X_test = X_test.astype('float32') / 255
 else:
     raise NotImplementedError()
  
