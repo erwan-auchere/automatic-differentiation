@@ -11,8 +11,10 @@ from pl import PL
 from utils import one_hot, generate_nothing
 from models.preact_resnet import PreActResNet18
 from models.easy_net import ConvNet
+from models.easy_net_26 import ConvNet1
 from models.preact_cifar100 import preactresnet18
 from dataset import DataSplit
+import matplotlib.pyplot as plt
 #from neuralsort import NeuralSort
 #from dknn_layer import DKNN
 
@@ -23,31 +25,31 @@ random.seed(94305)
 
 parser = argparse.ArgumentParser(
     description="Differentiable k-nearest neighbors.")
-parser.add_argument("--k", type=int, metavar="k")
-parser.add_argument("--tau", type=float, metavar="tau")
+#parser.add_argument("--k", type=int, metavar="k")
+#parser.add_argument("--tau", type=float, metavar="tau")
 parser.add_argument("--nloglr", type=float, metavar="-log10(beta)")
-parser.add_argument("--method", type=str)
-parser.add_argument("-resume", action='store_true')
+#parser.add_argument("--method", type=str)
+#parser.add_argument("-resume", action='store_true')
 parser.add_argument("--dataset", type=str)
 
 args = parser.parse_args()
 dataset = args.dataset
 split = DataSplit(dataset)
-print(args)
+#print(args)
 
-k = args.k
-tau = args.tau
+#k = args.k
+#tau = args.tau
 NUM_TRAIN_QUERIES = 100
 NUM_TEST_QUERIES = 10
 NUM_TRAIN_NEIGHBORS = 100
 LEARNING_RATE = 10 ** -args.nloglr
 NUM_SAMPLES = 5
-resume = args.resume
-method = args.method
+#resume = args.resume
+#method = args.method
 
-NUM_EPOCHS = 30
+NUM_EPOCHS = 20
 
-EMBEDDING_SIZE = 500 if dataset == 'mnist' else  100 if dataset == 'cifar100' else 512
+EMBEDDING_SIZE = 500 if dataset == 'mnist' else 512 if  dataset == 'cifar10' else  100 if dataset == 'cifar100'  else 500
 
 
 #def experiment_id(dataset, k, tau, nloglr, method):
@@ -66,7 +68,9 @@ gpu = torch.device('cuda')
 
 if dataset == 'mnist':
     h_phi = ConvNet().to(gpu)
-elif dataset == 'SVHN':
+elif dataset == 'EMNIST':
+    h_phi = ConvNet().to(gpu)
+elif dataset == 'EMNIST_DIGITS':
     h_phi = ConvNet().to(gpu)
 elif dataset == 'cifar100':
     h_phi=preactresnet18().to(gpu)
@@ -102,6 +106,8 @@ def train(epoch):
         optimizer.step()
     to_average.append((-loss).item())
     print('train', sum(to_average) / len(to_average))
+    return to_average
+    
 
 
 logfile = open('./logs/%s.log' % e_id, 'a' if resume else 'w')
@@ -117,7 +123,7 @@ def test(epoch, val=False):
     global best_acc
     data = batched_val if val else batched_test
 
-    accs = []
+    accs_test = []
 
     for x, y in data:
         x = x.to(device=gpu)
@@ -125,8 +131,8 @@ def test(epoch, val=False):
         logits = linear_layer(h_phi(x))
         pred = logits.argmax(dim=-1)
         acc = (pred == y).float().mean()
-        accs.append(acc.item())
-    avg_acc = sum(accs) / len(accs)
+        accs_test.append(acc.item())
+    avg_acc = sum(accs_test) / len(accs_test)
     print('val' if val else 'test', avg_acc)
     if avg_acc > best_acc and val:
         print('Saving...')
@@ -139,14 +145,20 @@ def test(epoch, val=False):
             os.mkdir('checkpoint')
         torch.save(state, './checkpoint/ckpt-%s.t7' % e_id)
         best_acc = avg_acc
+    return accs_test
+    
+
+
+
 
 
 for t in range(NUM_EPOCHS):
     print('Beginning epoch %d: ' % t, e_id)
-    print('Beginning epoch %d: ' % t, e_id, file=logfile)
+    #print('Beginning epoch %d: ' % t, e_id, file=logfile)
     logfile.flush()
     train(t)
     test(t, val=True)
+    
 
 
 checkpoint = torch.load('./checkpoint/ckpt-%s.t7' % e_id)
@@ -154,3 +166,22 @@ h_phi.load_state_dict(checkpoint['net'])
 test(-1, val=True)
 test(-1, val=False)
 logfile.close()
+
+
+def plot_progress(train_losses, val_accuracies):
+    fig, (left, right) = plt.subplots(1, 2, figsize=(16,8))
+
+    left.plot(train_losses, color='red', label='Train loss')
+    left.legend()
+    left.set_xlabel('Epochs')
+    left.set_ylabel('Cross-entropy')
+
+    right.plot(val_accuracies, color='green', label='Val accuracy')
+    right.legend()
+    right.set_xlabel('Epochs')
+    right.set_ylabel('Accuracy')
+    fig.show()
+    
+to_average=train(NUM_EPOCHS)
+accs_test=test(NUM_EPOCHS) 
+plot_progress(to_average, accs_test)

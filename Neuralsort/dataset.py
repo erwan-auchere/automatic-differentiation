@@ -38,12 +38,12 @@ class DataSplit(object):
         if dataset == 'mnist':
             trva_real = datasets.MNIST(root='./data-mnist', download=True)
             tr_real_ds, va_real_ds = random_split(trva_real, [55000, 5000])
-            xtr_real = trva_real.train_data[tr_real_ds.indices].view(
+            xtr_real = trva_real.data[tr_real_ds.indices].view(
                 -1, 1, 28, 28)
-            ytr_real = trva_real.train_labels[tr_real_ds.indices]
-            xva_real = trva_real.train_data[va_real_ds.indices].view(
+            ytr_real = trva_real.targets[tr_real_ds.indices]
+            xva_real = trva_real.data[va_real_ds.indices].view(
                 -1, 1, 28, 28)
-            yva_real = trva_real.train_labels[va_real_ds.indices]
+            yva_real = trva_real.targets[va_real_ds.indices]
 
             trans = transforms.Compose(
                 [transforms.ToPILImage(), transforms.ToTensor()]
@@ -57,15 +57,15 @@ class DataSplit(object):
                 transforms.ToTensor()
             ]))
             
-        elif dataset == 'SVHN':
-            trva_real = datasets.SVHN(root='./data-SVHN', download=True)
+        elif dataset == 'EMNIST':
+            trva_real = datasets.EMNIST(root='./data-EMNIST', split= 'mnist' , download=True)
             tr_real_ds, va_real_ds = random_split(trva_real, [55000, 5000])
-            xtr_real = trva_real.train_data[tr_real_ds.indices].view(
-                -1, 1, 32, 32)
-            ytr_real = trva_real.train_labels[tr_real_ds.indices]
-            xva_real = trva_real.train_data[va_real_ds.indices].view(
-                -1, 1, 32, 32)
-            yva_real = trva_real.train_labels[va_real_ds.indices]
+            xtr_real = trva_real.data[tr_real_ds.indices].view(
+                -1, 1, 28, 28)
+            ytr_real = trva_real.targets[tr_real_ds.indices]
+            xva_real = trva_real.data[va_real_ds.indices].view(
+                -1, 1, 28, 28)
+            yva_real = trva_real.targets[va_real_ds.indices]
 
             trans = transforms.Compose(
                 [transforms.ToPILImage(), transforms.ToTensor()]
@@ -75,9 +75,32 @@ class DataSplit(object):
                 x=xtr_real, y=ytr_real, transform=trans)
             self.valid_dataset = ClassicDataset(
                 x=xva_real, y=yva_real, transform=trans)
-            self.test_dataset = datasets.SVHN(root='./data-SVHN', train=False, transform=transforms.Compose([
+            self.test_dataset = datasets.EMNIST(root='./data-EMNIST', train=False,split= 'mnist', transform=transforms.Compose([
                 transforms.ToTensor()
             ]))
+        
+        elif dataset == 'EMNIST_DIGITS':
+            trva_real = datasets.EMNIST(root='./data-EMNIST_DIGITS', split= 'digits' , download=True)
+            tr_real_ds, va_real_ds = random_split(trva_real, [230000, 10000])
+            xtr_real = trva_real.data[tr_real_ds.indices].view(
+                -1, 1, 28, 28)
+            ytr_real = trva_real.targets[tr_real_ds.indices]
+            xva_real = trva_real.data[va_real_ds.indices].view(
+                -1, 1, 28, 28)
+            yva_real = trva_real.targets[va_real_ds.indices]
+
+            trans = transforms.Compose(
+                [transforms.ToPILImage(), transforms.ToTensor()]
+            )
+
+            self.train_dataset = ClassicDataset(
+                x=xtr_real, y=ytr_real, transform=trans)
+            self.valid_dataset = ClassicDataset(
+                x=xva_real, y=yva_real, transform=trans)
+            self.test_dataset = datasets.EMNIST(root='./data-EMNIST_DIGITS', train=False,split= 'digits', transform=transforms.Compose([
+                transforms.ToTensor()
+            ]))
+            
 
         elif dataset == 'fashion-mnist':
             trva_real = datasets.FashionMNIST(

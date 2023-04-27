@@ -33,9 +33,9 @@ parser.add_argument("--dataset", type=str, required=True)
 parser.add_argument("--num_train_queries", type=int, default=100)
 # no effect on training, but massive effect on memory usage
 parser.add_argument("--num_test_queries", type=int, default=10)
-parser.add_argument("--num_train_neighbors", type=int, default=100)
-parser.add_argument("--num_samples", type=int, default=5)
-parser.add_argument("--num_epochs", type=int, default=200)
+parser.add_argument("--num_train_neighbors", type=int, default=200)
+parser.add_argument("--num_samples", type=int, default=10)
+parser.add_argument("--num_epochs", type=int, default=50)
 
 args = parser.parse_args()
 dataset = args.dataset
@@ -52,7 +52,7 @@ NUM_SAMPLES = args.num_samples
 resume = args.resume
 method = args.method
 NUM_EPOCHS = args.num_epochs
-EMBEDDING_SIZE = 500 if dataset == 'mnist' else  100 if dataset == 'cifar100' else 512
+EMBEDDING_SIZE = 500 if dataset == 'mnist' else 512 if  dataset == 'cifar10' else  100 if dataset == 'cifar100'  else 500
 
 
 def experiment_id(dataset, k, tau, nloglr, method):
@@ -91,6 +91,10 @@ def dknn_loss(query, neighbors, query_label, neighbor_labels, method=method):
 gpu = torch.device('cuda')
 
 if dataset == 'mnist':
+    h_phi = ConvNet().to(gpu)
+elif dataset == 'EMNIST':
+    h_phi = ConvNet().to(gpu)
+elif dataset == 'EMNIST_DIGITS':
     h_phi = ConvNet().to(gpu)
 elif dataset == 'cifar100':
     h_phi=preactresnet18().to(gpu)
@@ -157,6 +161,7 @@ def train(epoch):
         loss.backward()
         optimizer.step()
         to_average.append((-loss).item() / k)
+        
 
     print('Avg. train correctness of top k:',
           sum(to_average) / len(to_average))
@@ -220,6 +225,7 @@ def test(epoch, val=False):
             results.append(acc(query_e, neighbors_e, query_y, labels))
         total_acc = np.mean(np.array(results))
         total_acc_batch = np.mean(results[0])
+        
 
     split = 'val' if val else 'test'
     print('Avg. %s acc:' % split, total_acc)
@@ -250,3 +256,21 @@ h_phi.load_state_dict(checkpoint['net'])
 test(-1, val=True)
 test(-1, val=False)
 logfile.close()
+
+def plot_progress(train_losses, val_accuracies):
+    fig, (left, right) = plt.subplots(1, 2, figsize=(16,8))
+
+    left.plot(train_losses, color='red', label='Train loss')
+    left.legend()
+    left.set_xlabel('Epochs')
+    left.set_ylabel('Cross-entropy')
+
+    right.plot(val_accuracies, color='green', label='Val accuracy')
+    right.legend()
+    right.set_xlabel('Epochs')
+    right.set_ylabel('Accuracy')
+    fig.show()
+
+#to_average=train(NUM_EPOCHS)
+#accs_test=test(NUM_EPOCHS) 
+#plot_progress(to_average, accs_test)

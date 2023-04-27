@@ -39,10 +39,10 @@ class PL(Distribution):
         self.n = self.scores.size()[1]
 
         if isinstance(scores,Number):
-            batch_shape = torch.Size()
+            batch_shape = torch.tensor().size()
         else:
-            batch_shape = self.scores.size()
-        super(PL, self).__init__(batch_shape, validate_args=validate_args)
+            batch_shape = self.scores.size()[1]
+        super().__init__(batch_shape,validate_args=validate_args)
 
         if self._validate_args:
             if not torch.gt(self.scores, torch.zeros_like(self.scores)).all():
@@ -117,6 +117,7 @@ if __name__ == '__main__':
 
     scores = torch.Tensor([[100.8, 0.3, 11111.9]]).unsqueeze(-1)
     tau = 0.1
+    batch_shape = scores.size()[1]
 
     # hard = True is necessary
     pl_dist = PL(scores, tau, hard=True)
