@@ -194,7 +194,7 @@ def acc(query, neighbors, query_label, neighbor_labels):
     return (prediction == query_label).float().cpu().numpy()
 
 
-logfile = open('./logs/%s.log' % e_id, 'a' if resume else 'w')
+logfile = open('./save/%s.log' % e_id, 'a' if resume else 'w')
 
 batched_query_val = split.get_valid_loader(NUM_TEST_QUERIES)
 batched_query_test = split.get_test_loader(NUM_TEST_QUERIES)

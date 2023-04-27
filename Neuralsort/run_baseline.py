@@ -110,7 +110,7 @@ def train(epoch):
     
 
 
-logfile = open('./logs/%s.log' % e_id, 'a' if resume else 'w')
+logfile = open('./save/%s.log' % e_id, 'a' if resume else 'w')
 
 batched_val = split.get_valid_loader(NUM_TEST_QUERIES)
 batched_test = split.get_test_loader(NUM_TEST_QUERIES)
