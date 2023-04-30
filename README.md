@@ -74,6 +74,7 @@ python run_dknn.py --k=9 --tau=85 --nloglr=3 --method=deterministic --dataset=ci
 ```
 
 _Training standard knn to classify mnist
+
 ```
 cd cd Neuralsort
 
@@ -85,9 +86,8 @@ _Training resnet model to calssify mnist digit
 ```
 cd Neuralsort
 python run_baseline.py --dataset=mnist --nloglr=3
+```
 
-
----
 ## Opt Net
 
 The folder `optnet` contains:
