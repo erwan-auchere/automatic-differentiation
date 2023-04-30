@@ -73,7 +73,7 @@ cd Neuralsort
 python run_dknn.py --k=9 --tau=85 --nloglr=3 --method=deterministic --dataset=cifar100
 ```
 
-_Training standard knn to classify mnist
+_Training standard knn to classify mnist_
 
 ```
 cd cd Neuralsort
@@ -81,7 +81,7 @@ cd cd Neuralsort
 python run_knn.py  --dataset=mnist
 ```
 
-_Training resnet model to calssify mnist digit
+_Training resnet model to calssify mnist digit_
 
 ```
 cd Neuralsort
