@@ -7,7 +7,7 @@ In this project, we experiment with two of these methods: the neural sort [1] (a
 2. [Opt Net](#opt-net)
 
 ---
-## [NeuralSort](#neuralsort)
+## [NeuralSort]
 This project proposes a Pytorch implementation of the [NeuralSort](https://arxiv.org/abs/1903.08850) presentend by Aditya Grover et al. in 2019.
 
 ### Project tree
