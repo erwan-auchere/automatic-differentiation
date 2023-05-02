@@ -3,8 +3,11 @@
 A common criticism made against deep learning models is their lack of interpretability. For this reason, the past few years have seen emerge different attempts to produce interpretable layers to be used in a deep learning framework.<br>
 In this project, we experiment with two of these methods: the neural sort [1] (a continuous relaxation of the sorting operator) and the optnet [2] (a neural layer that solves a (potentially constrained) quadratic program).
 
+1. [NeuralSort](#neuralsort)
+2. [Opt Net](#opt-net)
+
 ---
-## Neural Sort
+## [NeuralSort](#neuralsort)
 This project proposes a Pytorch implementation of the [NeuralSort](https://arxiv.org/abs/1903.08850) presentend by Aditya Grover et al. in 2019.
 
 ### Project tree
@@ -90,7 +93,7 @@ python run_baseline.py --dataset=mnist --nloglr=3
 
 ---
 
-## Opt Net
+## [Opt Net](#opt-net)
 
 The folder `optnet` contains:
 - a python file with several functions and classes to define the models used;
