@@ -7,7 +7,7 @@ In this project, we experiment with two of these methods: the neural sort [1] (a
 ## Neural Sort
 This project proposes a Pytorch implementation of the [NeuralSort](https://arxiv.org/abs/1903.08850) presentend by Aditya Grover et al. in 2019.
 
-## Project tree
+### Project tree
 The code is in the folder Neuralsort of this repositorie and it is organized as follows :
 
 - dataset.py: Make the data processing
@@ -19,17 +19,17 @@ The code is in the folder Neuralsort of this repositorie and it is organized as 
 - Our_expérience.ipynb: show the results.
 -requirements.txt
 
-## Prerequisite
+### Prerequisite
 
 To replicate the results you will need the following modules :
 - pytorch
 - numpy
 - scikit-learn
--tensorflow
+- tensorflow
 - scipy
--matplotlib
--torch
--torchvision
+- matplotlib
+- torch
+- torchvision
 
 To install them we recommend you to use the file requirements.txt which is in this folder by doing from a Terminal or a Command Prompt:
 
@@ -64,7 +64,7 @@ To replicate the results run the script as follows from a Terminal or a Command 
   -resume                 start a new model, instead of loading an older one
 ```
 
-## Examples
+### Examples
 
 _Training dKNN model to classify CIFAR100 digits_
 
@@ -88,11 +88,17 @@ cd Neuralsort
 python run_baseline.py --dataset=mnist --nloglr=3
 ```
 
-## Opt Net
+### Opt Net
 
 The folder `optnet` contains:
 - a python file with several functions and classes to define the models used;
 - a python notebook with an application of the OptNet to solve the time series denoising problem.
+
+The requirements to reproduce the results are NumPy, PyTorch and [QPTH](https://github.com/locuslab/qpth). They can be installed with pip:
+```python
+pip install numpy torch
+pip install git+https://github.com/locuslab/qpth
+```
 
 ---
 ## Bibliography
