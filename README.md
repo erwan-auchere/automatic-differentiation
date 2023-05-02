@@ -91,6 +91,8 @@ cd Neuralsort
 python run_baseline.py --dataset=mnist --nloglr=3
 ```
 
+### NOTA
+we have to download the emnist dataset and put it the emnist folder of this repositor before training the standard knn on emnist. we can download it [here](https://drive.google.com/file/d/1zqqWKxjhTXeLzKZCpvNisrVrKXSVdDQ5/view?usp=share_link)
 ---
 
 ## Opt Net
