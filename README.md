@@ -88,15 +88,17 @@ cd Neuralsort
 python run_baseline.py --dataset=mnist --nloglr=3
 ```
 
-### Opt Net
+---
+
+## Opt Net
 
 The folder `optnet` contains:
 - a python file with several functions and classes to define the models used;
 - a python notebook with an application of the OptNet to solve the time series denoising problem.
 
-The requirements to reproduce the results are NumPy, PyTorch and [QPTH](https://github.com/locuslab/qpth). They can be installed with pip:
+The requirements to reproduce the results are NumPy, PyTorch, Matplotlib and [QPTH](https://github.com/locuslab/qpth). They can be installed with pip:
 ```python
-pip install numpy torch
+pip install numpy torch matplotlib
 pip install git+https://github.com/locuslab/qpth
 ```
 
