@@ -9,7 +9,6 @@ whether each neighbor is actually one of the k closest to each query.
 '''
 
 import torch
-from pl import PL
 from neuralsort import NeuralSort
 
 
@@ -36,8 +35,8 @@ class DKNN (torch.nn.Module):
             P_hat = self.soft_sort(scores)
             top_k = P_hat[:, :self.k, :].sum(1)
             return top_k
-        if self.method == 'stochastic':
-            pl_s = PL(scores, tau, hard=False)
-            P_hat = pl_s.sample((self.num_samples,))
-            top_k = P_hat[:, :, :self.k, :].sum(2)
-            return top_k
+        #if self.method == 'stochastic':
+         #   pl_s = PL(scores, tau, hard=False)
+         #   P_hat = pl_s.sample((self.num_samples,))
+          #  top_k = P_hat[:, :, :self.k, :].sum(2)
+           # return top_k

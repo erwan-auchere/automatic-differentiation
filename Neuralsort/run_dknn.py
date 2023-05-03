@@ -7,7 +7,6 @@ import numpy as np
 
 from itertools import islice
 from torch import Tensor, FloatTensor, LongTensor
-from pl import PL
 from utils import one_hot, generate_nothing
 from models.preact_resnet import PreActResNet18
 from models.easy_net import ConvNet
@@ -77,13 +76,13 @@ def dknn_loss(query, neighbors, query_label, neighbor_labels, method=method):
         correct_in_top_k = (correct * top_k_ness).sum(-1)
         loss = -correct_in_top_k
         return loss
-    elif method == 'stochastic':
-        top_k_ness = dknn_layer(query, neighbors)
-        correct = (query_label.unsqueeze(1) *
-                   neighbor_labels.unsqueeze(0)).sum(-1)
-        correct_in_top_k = (correct.unsqueeze(0) * top_k_ness).sum(-1)
-        loss = -correct_in_top_k
-        return loss
+    #elif method == 'stochastic':
+     #   top_k_ness = dknn_layer(query, neighbors)
+     #   correct = (query_label.unsqueeze(1) *
+     #              neighbor_labels.unsqueeze(0)).sum(-1)
+      #  correct_in_top_k = (correct.unsqueeze(0) * top_k_ness).sum(-1)
+      #  loss = -correct_in_top_k
+      #  return loss
     else:
         raise ValueError(method)
 
@@ -92,9 +91,9 @@ gpu = torch.device('cuda')
 
 if dataset == 'mnist':
     h_phi = ConvNet().to(gpu)
-elif dataset == 'EMNIST':
+elif dataset == 'emnist_mnist':
     h_phi = ConvNet().to(gpu)
-elif dataset == 'EMNIST_DIGITS':
+elif dataset == 'emnist_digit':
     h_phi = ConvNet().to(gpu)
 elif dataset == 'cifar100':
     h_phi=preactresnet18().to(gpu)
@@ -257,20 +256,3 @@ test(-1, val=True)
 test(-1, val=False)
 logfile.close()
 
-def plot_progress(train_losses, val_accuracies):
-    fig, (left, right) = plt.subplots(1, 2, figsize=(16,8))
-
-    left.plot(train_losses, color='red', label='Train loss')
-    left.legend()
-    left.set_xlabel('Epochs')
-    left.set_ylabel('Cross-entropy')
-
-    right.plot(val_accuracies, color='green', label='Val accuracy')
-    right.legend()
-    right.set_xlabel('Epochs')
-    right.set_ylabel('Accuracy')
-    fig.show()
-
-#to_average=train(NUM_EPOCHS)
-#accs_test=test(NUM_EPOCHS) 
-#plot_progress(to_average, accs_test)

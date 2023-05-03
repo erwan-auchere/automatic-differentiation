@@ -7,11 +7,9 @@ import numpy as np
 
 from itertools import islice
 from torch import Tensor, FloatTensor, LongTensor
-from pl import PL
 from utils import one_hot, generate_nothing
 from models.preact_resnet import PreActResNet18
 from models.easy_net import ConvNet
-from models.easy_net_26 import ConvNet1
 from models.preact_cifar100 import preactresnet18
 from dataset import DataSplit
 import matplotlib.pyplot as plt
@@ -29,7 +27,7 @@ parser = argparse.ArgumentParser(
 #parser.add_argument("--tau", type=float, metavar="tau")
 parser.add_argument("--nloglr", type=float, metavar="-log10(beta)")
 #parser.add_argument("--method", type=str)
-#parser.add_argument("-resume", action='store_true')
+parser.add_argument("-resume", action='store_true')
 parser.add_argument("--dataset", type=str)
 
 args = parser.parse_args()
@@ -44,12 +42,13 @@ NUM_TEST_QUERIES = 10
 NUM_TRAIN_NEIGHBORS = 100
 LEARNING_RATE = 10 ** -args.nloglr
 NUM_SAMPLES = 5
-#resume = args.resume
+resume = args.resume
 #method = args.method
 
 NUM_EPOCHS = 20
 
-EMBEDDING_SIZE = 500 if dataset == 'mnist' else 512 if  dataset == 'cifar10' else  100 if dataset == 'cifar100'  else 500
+#EMBEDDING_SIZE = 500 if dataset == 'mnist' else 512 if  dataset == 'cifar10' else  100 if dataset == 'cifar100'  else 500
+EMBEDDING_SIZE = 512 if  dataset == 'cifar10' else  100 if dataset == 'cifar100' else 500
 
 
 #def experiment_id(dataset, k, tau, nloglr, method):
@@ -68,9 +67,9 @@ gpu = torch.device('cuda')
 
 if dataset == 'mnist':
     h_phi = ConvNet().to(gpu)
-elif dataset == 'EMNIST':
+elif dataset == 'emnist_mnist':
     h_phi = ConvNet().to(gpu)
-elif dataset == 'EMNIST_DIGITS':
+elif dataset == 'emnist_digit':
     h_phi = ConvNet().to(gpu)
 elif dataset == 'cifar100':
     h_phi=preactresnet18().to(gpu)
@@ -106,7 +105,6 @@ def train(epoch):
         optimizer.step()
     to_average.append((-loss).item())
     print('train', sum(to_average) / len(to_average))
-    return to_average
     
 
 
@@ -145,7 +143,6 @@ def test(epoch, val=False):
             os.mkdir('checkpoint')
         torch.save(state, './checkpoint/ckpt-%s.t7' % e_id)
         best_acc = avg_acc
-    return accs_test
     
 
 
@@ -167,21 +164,3 @@ test(-1, val=True)
 test(-1, val=False)
 logfile.close()
 
-
-def plot_progress(train_losses, val_accuracies):
-    fig, (left, right) = plt.subplots(1, 2, figsize=(16,8))
-
-    left.plot(train_losses, color='red', label='Train loss')
-    left.legend()
-    left.set_xlabel('Epochs')
-    left.set_ylabel('Cross-entropy')
-
-    right.plot(val_accuracies, color='green', label='Val accuracy')
-    right.legend()
-    right.set_xlabel('Epochs')
-    right.set_ylabel('Accuracy')
-    fig.show()
-    
-to_average=train(NUM_EPOCHS)
-accs_test=test(NUM_EPOCHS) 
-plot_progress(to_average, accs_test)

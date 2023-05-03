@@ -9,6 +9,7 @@ import pandas as pd
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.datasets import cifar100
+from tensorflow.keras.datasets import fashion_mnist
 from sklearn.metrics import classification_report
 
 parser = argparse.ArgumentParser(
@@ -20,6 +21,16 @@ dataset = args.dataset
 
 if dataset == 'mnist':
     (train_images , train_labels) , (test_images , test_labels ) = mnist.load_data()
+    flatten = train_images.shape[1] * train_images.shape[2]
+    X_train = train_images.reshape(len(train_images), flatten )
+    X_test = test_images.reshape(len(test_images), flatten )
+
+    ## Grey Scale is 0 to 255. Divide by 255 to normalize values 0 to 1.
+    X_train = X_train.astype('float32') / 255
+    X_test = X_test.astype('float32') / 255
+
+elif dataset == 'fashion_mnist':
+    (train_images , train_labels) , (test_images , test_labels ) = fashion_mnist.load_data()
     flatten = train_images.shape[1] * train_images.shape[2]
     X_train = train_images.reshape(len(train_images), flatten )
     X_test = test_images.reshape(len(test_images), flatten )
@@ -104,8 +115,10 @@ print('the values of accuracy for each values of k', accuracy)
 print('the best accuracy is', np.max(accuracy))
 
  #Plot results
+
+plt.figure(figsize=(6, 4))
 plt.plot(k_values, accuracy)
 plt.xlabel('k')
-plt.ylabel('model accuracy')
-plt.savefig('books_read.png')
+plt.ylabel('accuracy')
+plt.savefig('acc_with_k.png')
 

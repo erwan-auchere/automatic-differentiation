@@ -227,7 +227,7 @@ if __name__ == '__main__':
     def get_shapes(loader):
         return [t.shape for t in next(loader.__iter__())]
 
-    dsets = ['mnist', 'fashion-mnist', 'emnist-digit','emnist-mnist','cifar10','cifar100']
+    dsets = ['mnist', 'fashion_mnist', 'emnist_digit','emnist_mnist','cifar10','cifar100']
     batch_sizes = [1, 6]
     for d in dsets:
         split = DataSplit(d)
